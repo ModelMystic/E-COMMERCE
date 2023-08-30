@@ -44,6 +44,7 @@ app.use(
     brand : String,
     description : String,
     comment : [{
+      commentername : String,
       comm : String
     }]
 }]
@@ -52,7 +53,11 @@ app.use(
 merchantSchema.plugin(passportLocalMongoose);
 merchantSchema.plugin(findOrCreate);
 
+
+
 const Merchant = new mongoose.model("Merchant", merchantSchema);
+
+
 
 passport.use(Merchant.createStrategy());
 
@@ -67,6 +72,278 @@ passport.deserializeUser(async (id, done) => {
 
 
 
+/////////////////////Buyer Side///////////////////
+
+///initial Page/////
+app.get("/", function (req, res) {
+  var arr = [];
+  async function myFunction() {
+
+    return await Merchant.find({"products": {$ne : null}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+        value.forEach(user => {
+          user.products.forEach(product => {
+            arr.push(product);
+          });
+        });
+        console.log(arr);
+      
+
+        const shuffledArr = arr.sort(() => Math.random() - 0.5);
+        console.log(shuffledArr);
+        res.render("initialPage", {shuffledArr : shuffledArr});
+    }
+  );
+});
+
+
+//////home page///////
+app.get("/home", (req, res)=>{
+  if(req.isAuthenticated()){
+    var arr = [];
+  async function myFunction() {
+
+    return await Merchant.find({"products": {$ne : null}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+        value.forEach(user => {
+          user.products.forEach(product => {
+            arr.push(product);
+          });
+        });
+        console.log(arr);
+      
+
+        const shuffledArr = arr.sort(() => Math.random() - 0.5);
+        console.log(shuffledArr);
+        res.render("home", {shuffledArr : shuffledArr});
+    }
+  );
+  }else{
+    res.redirect("/login");
+  }
+})
+
+
+
+//////category wise searching//////////
+app.get("/category/:categoryName", (req, res)=>{
+  var arr = [];
+  async function myFunction() {
+
+    return await Merchant.find({"products": { $elemMatch: {
+      "category": req.params.categoryName
+    }}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+        value.forEach(user => {
+          user.products.forEach(product => {
+            arr.push(product);
+          });
+        });
+        console.log(arr);
+      
+
+        const shuffledArr = arr.sort(() => Math.random() - 0.5);
+        console.log(shuffledArr);
+        res.render("initialPage", {shuffledArr : shuffledArr});
+    }
+  );
+})
+
+app.get("/log/category/:categoryName", (req, res)=>{
+  if(req.isAuthenticated()){
+  var arr = [];
+  async function myFunction() {
+
+    return await Merchant.find({"products": { $elemMatch: {
+      "category": req.params.categoryName
+    }}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+        value.forEach(user => {
+          user.products.forEach(product => {
+            arr.push(product);
+          });
+        });
+        console.log(arr);
+      
+
+        const shuffledArr = arr.sort(() => Math.random() - 0.5);
+        console.log(shuffledArr);
+        res.render("home", {shuffledArr : shuffledArr});
+    }
+  );
+  }else{
+    res.redirect("/initialPage");
+  }
+});
+
+
+/////////product full view///////////
+
+app.get("/fullview/:productID", function(req, res){
+  async function myFunction() {
+
+    return await Merchant.find({"products": {$ne : null}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+
+        value.forEach(user=>{
+          user.products.forEach(product =>{
+            if(product.id === req.params.productID){
+              res.render("productView", {product : product});
+            }
+          })
+        })
+
+
+    }
+  );
+
+})
+
+app.get("/log/fullview/:productID", function(req, res){
+  if(req.isAuthenticated()){
+  async function myFunction() {
+
+    return await Merchant.find({"products": {$ne : null}} );
+  }
+  myFunction().then(
+   
+    function(value) {
+
+        value.forEach(user=>{
+          user.products.forEach(product =>{
+            if(product.id === req.params.productID){
+              res.render("logProductView", {product : product});
+            }
+          })
+        })
+
+
+    }
+  );
+  }else{
+    res.redirect("/login");
+  }
+})
+
+///////comment handling///////
+
+app.post("/comment/:productID", async (req, res) => {
+  if(req.isAuthenticated()){
+
+    const productID = req.params.productID;
+    const comment = req.body.comment;
+  
+    async function myFunction() {
+  
+      return await Merchant.find({});
+    }
+    myFunction().then(
+     
+      function(value) {
+  
+          value.forEach(user=>{
+            user.products.forEach(async (product) =>{
+              if(product.id === productID){
+                product.comment.push({ commentername: req.user.name , comm : comment});
+                await user.save();
+                res.redirect(`/fullview/${req.params.productID}`);
+              }
+            })
+          })
+  
+  
+      }
+    );
+  }else{
+    res.redirect("/login");
+  }
+})
+
+///////profile//////
+
+app.get("/profile", (req, res)=>{
+  if(req.isAuthenticated()){
+      res.render("profile", {
+          name : req.user.name,
+          sellername : req.user.sellername,
+          email : req.user.username,
+          noOfProducts : req.user.products.length
+      })
+  }else{
+      res.redirect("/login");
+  }
+})
+
+////////////login for shoppers////////
+app.get("/login", function (req, res) {
+  res.render("login");
+});
+
+app.post("/login", (req, res) => {
+  const user = new Merchant({
+    username: req.body.username,
+    password: req.body.password,
+  });
+
+  req.login(user, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local", { failureRedirect: "/login" })(
+        req,
+        res,
+        function () {
+          res.redirect("/home");
+        }
+      );
+    }
+  });
+});
+
+app.get("/register", function (req, res) {
+  res.render("register");
+});
+
+app.post("/register", (req, res) => {
+  Merchant.register(
+    { username: req.body.username, name: req.body.name },
+    req.body.password,
+    function (err, user) {
+      if (err) {
+        console.log(err);
+        res.redirect("/register");
+      } else {
+        passport.authenticate("local")(req, res, function () {
+          res.redirect("/home");
+        });
+      }
+    }
+  );
+});
+
+app.get("/logout", (req, res) => {
+  req.logout(function (err) {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
 ////////////////////////MERCHANT SIDE/////////////
 
 app.get("/merHome", (req, res)=>{

@@ -1,0 +1,23 @@
+<%- include('partials/shopperHeader') %>
+
+
+
+
+   <% shuffledArr.forEach(element => { %>
+    <div class="card" style="width: 40rem; margin: 10px;  margin-left: 28%;">
+        <div class="flex-container" >
+        <img class="card-img-top column" src="<%= element.img %>" alt="Card image cap" > 
+        
+          <h3 class="card-title column" style="text-align: center;"><%= element.name %></h3>
+          <h4 class="card-title column" style="text-align: center;"><%= element.price %></h4>
+        
+        </div>
+        <div class="card-body">
+          <p class="card-text" style="padding: 10px; padding-bottom: 0px;"><%= element.description.substring(0, 50) + "..." %></p>
+        </div>
+          <a href="fullview/<%= element.id %>" class="btn btn-primary">Read full Secret</a>
+        </div>
+      </div>
+   <% }) %>
+
+<%- include('partials/footer') %>

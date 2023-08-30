@@ -1,0 +1,26 @@
+<%- include('partials/shopperHeader') %>
+
+<img src="<%= product.img %>" alt="">
+<h2><%= product.name %></h2>
+<h4><%= product.price %></h4>
+<h2><%= product.brand %></h2>
+<h4><%= product.category %></h4>
+
+<p><%= product.description %></p>
+
+<h3>Comments</h3>
+<% product.comment.forEach(comment => { %>
+ <h4><%= comment.commentername %></h4>
+ <p><%= comment.comm %></p>
+<% }) %>
+
+
+<form action="/comment/<%= product.id %>" method="POST">
+    <div class="form-group">
+        <input class="form-control" type="text" name="comment">
+      </div>
+      <button class="btn btn-primary" type="submit" name="button">Comment</button>
+</form>
+
+
+<%- include('partials/footer') %>

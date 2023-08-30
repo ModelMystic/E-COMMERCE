@@ -1,0 +1,36 @@
+<%- include('partials/shopfinalHead') %>
+
+<img src="<%= product.img %>" alt="">
+<h2><%= product.name %></h2>
+<h4><%= product.price %></h4>
+<h2><%= product.brand %></h2>
+<h4><%= product.category %></h4>
+
+<p><%= product.description %></p>
+
+
+<!-- <div class="rating">
+    <span><input type="radio" name="rating" id="str5" value="5"><label for="str5"></label></span>
+    <span><input type="radio" name="rating" id="str4" value="4"><label for="str4"></label></span>
+    <span><input type="radio" name="rating" id="str3" value="3"><label for="str3"></label></span>
+    <span><input type="radio" name="rating" id="str2" value="2"><label for="str2"></label></span>
+    <span><input type="radio" name="rating" id="str1" value="1"><label for="str1"></label></span>
+</div> -->
+
+<h3>Comments</h3>
+<% product.comment.forEach(comment => { %>
+<h4><%= comment.commentername %></h4>
+ <p><%= comment.comm %></p>
+<% }) %>
+
+
+<form action="/comment/<%= product.id %>" method="POST">
+    <div class="form-group">
+        <input class="form-control" type="text" name="comment">
+      </div>
+      <button class="btn btn-primary" type="submit" name="button">Comment</button>
+</form>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<%- include('partials/footer') %>
