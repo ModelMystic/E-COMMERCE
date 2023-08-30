@@ -1,0 +1,30 @@
+<%- include('partials/merHeader') %>
+
+<h2>Add New Product</h2>
+<a href="/newProduct">Create</a>
+
+<% products.forEach(product => { %>
+
+  
+  <div class="card" style="margin: 10px;">
+    <div class="row no-gutters">
+        <div class="col-auto">
+            <img src="<%= product.img %>" class="img-fluid " alt="" style="height: 17rem; width: 20rem;">
+        </div>
+        <div class="col">
+            <div class="card-block px-2" style="margin: 8px; position: relative;">
+                <h3 class="card-title"><%= product.name %></h3>
+                <h4 class="card-title"><%= product.price %></h4>
+                <h4 class="card-text"><%= product.brand %></h4>
+                <p class="card-text"><%= product.description.substring(0,100) %></p>
+                <a href="/myProduct/<%= product.id %>" class="btn btn-primary" style="position: absolute; left: 0.8rem; top: 13rem;">See Product</a>
+                <a href="/deleteProduct/<%= product.id %>" class="btn btn-primary" style="position: absolute; right: 0.8rem; top: 13rem;">Remove</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<% }) %>
+
+<%- include('partials/footer') %>

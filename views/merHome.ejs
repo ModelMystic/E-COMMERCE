@@ -1,0 +1,9 @@
+<%- include('partials/merHeader') %>
+
+<% var k = 1 %>
+<% merchants.forEach(merchant => { %>
+ <%= k %>. <%= merchant.name %>
+ <br>
+ <% k++ %>
+<% }) %>
+<%- include('partials/footer') %>

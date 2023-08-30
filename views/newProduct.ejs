@@ -1,0 +1,43 @@
+<%- include('partials/merHeader') %>
+
+<form action="/newProduct" method="POST">
+  <div class="form-group">
+    <label>Paste Image Link</label>
+    <input class="form-control" type="text" name="imgLink">
+  </div>
+  <div class="form-group">
+    <label for="productName">Name</label>
+    <input type="text" class="form-control" name="productName" />
+  </div>
+  <div class="form-group">
+    <label for="productPrice">Price in Rupees</label>
+    <input type="text" class="form-control" name="productPrice" />
+  </div>
+
+  <div class="form-group">
+  <label for="productCategory">Choose a category:</label>
+  <select id="productCategory" name="productCategory">
+    <option value="none">--select--</option>
+    <option value="beautyAndPersonalCare">Beauty & Personal Care</option>
+    <option value="stationary">Stationary</option>
+    <option value="electronic">Electronic Items</option>
+    <option value="boysFashion">Boy's Fashion</option>
+    <option value="girlsFashion">Girl's Fashion</option>
+    <option value="houseHold">HouseHold</option>
+    <option value="kitchen">Kitchen</option>
+  </select>
+</div>
+
+<div class="form-group">
+    <label for="brandName">Name Of Brand</label>
+    <input type="text" class="form-control" name="brandName" />
+  </div>
+<div class="form-group">
+    <label for="description">Add Description</label>
+    <input type="text" class="form-control" name="description" />
+  </div>
+
+  <button type="submit" class="btn btn-dark">ADD</button>
+</form>
+
+<%- include('partials/footer') %>
