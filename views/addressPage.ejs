@@ -1,0 +1,24 @@
+<%- include('partials/shopfinalHead') %>
+
+<h3>Your total billing cost is <%= amount %></h3>
+
+<a href="/addNewAddress/<%= productID %>"> Add New Address </a>
+
+<% addresses.forEach(address => { %>
+    <div class="card" style="margin: 10px;">
+        <div class="row no-gutters">
+            
+            <div class="col">
+                <div class="card-block px-2" style="margin: 8px; position: relative;">
+                    <h4 class="card-title"><%= address.fullname %></h4>
+                    <p class="card-text"><%= address.houseno %>, <%= address.area %></p>
+                    <p class="card-text"><%= address.city %>, <%= address.state %>, <%= address.pincode %></p>
+                    <p class="card-text">Phone number: <%= address.mobilenumber %></p>
+                    <a href="/paymentPage/<%= address.id %>" class="btn btn-primary" style="position: absolute; left: 0.8rem; top: 13rem;">Proceed</a>
+                </div>
+            </div>
+        </div>
+    </div>
+<% }) %>
+
+<%- include('partials/footer') %>

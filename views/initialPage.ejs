@@ -16,6 +16,8 @@
           <p class="card-text" style="padding: 10px; padding-bottom: 0px;"><%= element.description.substring(0, 50) + "..." %></p>
         </div>
           <a href="fullview/<%= element.id %>" class="btn btn-primary">Read full Secret</a>
+          <a href="/addToCart/<%= element.id %>" class="btn btn-primary">Add to cart</a>
+          <a href="/buy/<%= element.id %>" class="btn btn-primary">Buy Now</a>
         </div>
       </div>
    <% }) %>

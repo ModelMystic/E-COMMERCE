@@ -1,0 +1,26 @@
+<%- include('partials/shopfinalHead') %>
+
+<form action="/editProfile" method="POST">
+
+    <h1>
+        Name :
+        <textarea name="name" id="" cols="30" rows="1" style="border: none; outline: none; font-size: 50px; margin-left: 235px"><%= name %></textarea>
+    </h1>
+
+    <h3>
+        SellerName :
+        <textarea name="sellername" id="" cols="30" rows="1" style="border: none; outline: none; font-size: 50px; margin-left: 235px"><%= sellername %></textarea>
+    </h3>
+
+    <h3>
+        Email :
+        <textarea name="email" id="" cols="30" rows="1" style="border: none; outline: none; font-size: 50px; margin-left: 235px"><%= email %></textarea>
+    </h3>
+
+    <button class="btn btn-primary" type="submit" name="button">Update</button>
+
+
+</form>
+
+
+<%- include('partials/footer') %>

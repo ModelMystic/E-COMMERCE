@@ -1,0 +1,34 @@
+<%- include('partials/shopfinalHead') %>
+
+<% var url; %>
+          <% if (productID === "fullCart") { %>
+           <% url = "/addNewAddress/fullCart" %>
+          <% } else { %>
+            <%  url = `/addNewAddress/${productID}`  %>
+            <% } %>
+
+<form action=<%= url %> method="POST">
+    <div class="form-group">
+        <label>Country</label>
+        <input class="form-control" type="text" name="country">
+        <label>Full name(First and Last name)</label>
+        <input class="form-control" type="text" name="fullname">
+        <label>Mobile number</label>
+        <input class="form-control" type="text" name="mobilenumber">
+        <label>Flat, House no., Building, Company, Apartment</label>
+        <input class="form-control" type="text" name="houseno">
+        <label>Area, Street, Sector, Village</label>
+        <input class="form-control" type="text" name="area">
+        <label>Landmark</label>
+        <input class="form-control" type="text" name="landmark">
+        <label>Pincode</label>
+        <input class="form-control" type="text" name="pincode">
+        <label>Town/City</label>
+        <input class="form-control" type="text" name="city">
+        <label>State</label>
+        <input class="form-control" type="text" name="state">
+      </div>
+      <button class="btn btn-primary" type="submit" name="button">Add this address</button>
+</form>
+
+<%- include('partials/footer') %>

@@ -36,9 +36,29 @@ app.use(
     password: String,
     name: String,
     sellername : String,
+    address : [{
+      fullname : String,
+      mobilenumber : String,
+      houseno : String,
+      area : String,
+      landmark : String,
+      pincode : String,
+      city : String,
+      state : String,
+      country : String,
+    }],
+    cart : [{
+      productid : String,
+      name : String,
+      img : {type : String},
+      price : Number,
+      category : String,
+      brand : String,
+      description : String,
+    }],
     products : [{
     name : String,
-    price : String,
+    price : Number,
     img : { type: String, default: "https://cdn.pixabay.com/photo/2016/01/15/20/08/secret-1142327_640.jpg" },
     category : String,
     brand : String,
@@ -89,11 +109,10 @@ app.get("/", function (req, res) {
             arr.push(product);
           });
         });
-        console.log(arr);
+
       
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
-        console.log(shuffledArr);
         res.render("initialPage", {shuffledArr : shuffledArr});
     }
   );
@@ -116,11 +135,11 @@ app.get("/home", (req, res)=>{
             arr.push(product);
           });
         });
-        console.log(arr);
+
       
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
-        console.log(shuffledArr);
+
         res.render("home", {shuffledArr : shuffledArr});
     }
   );
@@ -148,11 +167,10 @@ app.get("/category/:categoryName", (req, res)=>{
             arr.push(product);
           });
         });
-        console.log(arr);
+
       
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
-        console.log(shuffledArr);
         res.render("initialPage", {shuffledArr : shuffledArr});
     }
   );
@@ -175,11 +193,10 @@ app.get("/log/category/:categoryName", (req, res)=>{
             arr.push(product);
           });
         });
-        console.log(arr);
+
       
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
-        console.log(shuffledArr);
         res.render("home", {shuffledArr : shuffledArr});
     }
   );
@@ -238,7 +255,9 @@ app.get("/log/fullview/:productID", function(req, res){
   }else{
     res.redirect("/login");
   }
-})
+});
+
+
 
 ///////comment handling///////
 
@@ -287,11 +306,202 @@ app.get("/profile", (req, res)=>{
   }else{
       res.redirect("/login");
   }
+});
+
+app.get("/editProfile", (req, res)=>{
+  if(req.isAuthenticated()){
+    res.render("profileEditor", {name : req.user.name, sellername : req.user.sellername, email : req.user.username });
+  }else{
+    res.redirect("/login");
+  }
+})
+
+app.post("/editProfile", async(req, res)=>{
+  if(req.isAuthenticated()){
+    req.user.name = req.body.name;
+    req.user.username = req.body.email;
+    req.user.sellername = req.body.sellername;
+
+    await req.user.save();
+    res.redirect("/profile");
+  }else{
+    res.redirect("/login");
+  }
+})
+
+
+/////////////////add to cart/////////
+
+app.get("/myCart", (req, res)=>{
+  if(req.isAuthenticated()){
+    res.render("myCart", {cart : req.user.cart});
+  }else{
+    res.redirect("/login");
+  }
+})
+
+app.get("/addToCart/:productID", (req, res)=>{
+  if(req.isAuthenticated()){
+     const productID = req.params.productID;
+    const comment = req.body.comment;
+  
+    async function myFunction() {
+  
+      return await Merchant.find({});
+    }
+    myFunction().then(
+     
+      async function(value) {
+
+        var name;
+        var img;
+        var category;
+        var brand;
+        var description;
+        var price;
+        var k = 0;
+  
+          value.forEach(user=>{
+            user.products.forEach( (product) =>{
+              if(product.id === productID){
+                name = product.name;
+                img = product.img;
+                category = product.category;
+                brand = product.brand;
+                description = product.description;
+                price = product.price;
+               
+              }
+            })
+           
+          })
+  req.user.cart.push({productid : productID, name : name, img : img, category : category, brand : brand, description : description, price: price})
+  await req.user.save();
+  res.render("myCart", {cart : req.user.cart});
+      }
+    );
+  }else{
+    res.redirect(`/login/${req.params.productID}`);
+  }
+});
+
+
+app.get("/deletefromcart/:productID", (req, res)=>{
+  if (req.isAuthenticated()){
+    var k = 0;
+    req.user.cart.forEach(function(product){
+      if (product.id === req.params.productID) {
+        async function myFunction() {
+          req.user.cart.splice(k, 1);
+
+          await req.user.save();
+  }
+  myFunction().then(
+   
+    function(value) {
+      res.redirect("/myCart");
+    }
+  );
+      }
+      k++;
+    });
+  }else {
+    res.redirect("/login");
+  }
+});
+
+
+/////////buy routes/////////
+app.get("/buy/:productID", (req, res)=>{
+  if(req.isAuthenticated()){
+    const productID = req.params.productID;
+  
+    async function myFunction() {
+  
+      return await Merchant.find({});
+    }
+    myFunction().then(
+     
+      function(value) {
+  
+          value.forEach(user=>{
+            user.products.forEach(async (product) =>{
+              if(product.id === productID){
+                
+                res.render("addressPage", {addresses : req.user.address, productID : req.params.productID, amount : product.price});
+              }
+            })
+          })
+  
+  
+      }
+    );
+
+    
+  }else{
+    res.redirect(`/login/${req.params.productID}`)
+  }
+});
+
+app.get("/addNewAddress/fullCart", (req, res)=>{
+  if(req.isAuthenticated()){
+    res.render("newAdress", {productID : "fullCart"});
+  }else{
+    res.redirect("/login");
+  }
+})
+
+app.post("/addNewAddress/fullCart", async (req, res)=>{
+  
+  if(req.isAuthenticated()){
+    req.user.address.push({fullname : req.body.fullname, mobilenumber : req.body.mobilenumber, houseno : req.body.houseno, area : req.body.area, landmark : req.body.landmark, pincode : req.body.pincode, city : req.body.city, state : req.body.state, country : req.body.country});
+    await req.user.save();
+    res.redirect("/orderFullCart");
+  }else{
+    res.redirect("/login")
+  }
+})
+
+app.get("/addNewAddress/:productID", (req, res)=>{
+  if(req.isAuthenticated()){
+    res.render("newAdress", {productID : req.params.productID});
+  }else{
+    res.redirect("/login");
+  }
+})
+
+app.post("/addNewAddress/:productID", async (req, res)=>{
+  
+  if(req.isAuthenticated()){
+    req.user.address.push({fullname : req.body.fullname, mobilenumber : req.body.mobilenumber, houseno : req.body.houseno, area : req.body.area, landmark : req.body.landmark, pincode : req.body.pincode, city : req.body.city, state : req.body.state, country : req.body.country});
+    await req.user.save();
+    res.redirect(`/buy/${req.params.productID}`);
+  }else{
+    res.redirect("/login")
+  }
+})
+
+
+/////order Full Cart/////////
+app.get("/orderFullCart", (req, res)=>{
+  var productArray = []
+  if(req.isAuthenticated()){
+    var amount = 0;
+    req.user.cart.forEach(product => {
+      amount = amount + product.price;
+      productArray.push(product.productid);
+      
+    });
+
+    res.render("orderFullCart", {cart : req.user.cart, amount : amount, addresses : req.user.address})
+  }else{
+    res.redirect("/login");
+  }
 })
 
 ////////////login for shoppers////////
 app.get("/login", function (req, res) {
-  res.render("login");
+  res.render("login", {productID : "not"});
 });
 
 app.post("/login", (req, res) => {
@@ -309,6 +519,32 @@ app.post("/login", (req, res) => {
         res,
         function () {
           res.redirect("/home");
+        }
+      );
+    }
+  });
+});
+
+
+app.get("/login/:productID", (req, res)=>{
+  res.render("login", {productID : req.params.productID} );
+})
+
+app.post("/login/:productID", (req, res) => {
+  const user = new Merchant({
+    username: req.body.username,
+    password: req.body.password,
+  });
+
+  req.login(user, function (err) {
+    if (err) {
+      console.log(err);
+    } else {
+      passport.authenticate("local", { failureRedirect: "/login" })(
+        req,
+        res,
+        function () {
+          res.redirect(`/log/fullview/${req.params.productID}`);
         }
       );
     }
@@ -344,7 +580,7 @@ app.get("/logout", (req, res) => {
     res.redirect("/");
   });
 });
-////////////////////////MERCHANT SIDE/////////////
+////////////////////////MERCHANT SIDE///////////////////////////////////////////////////////////////////////////
 
 app.get("/merHome", (req, res)=>{
     if(req.isAuthenticated()){

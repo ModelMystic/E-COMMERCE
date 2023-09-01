@@ -8,6 +8,9 @@
 
 <p><%= product.description %></p>
 
+<a href="/addToCart/<%= product.id %>" class="btn btn-primary">Add to cart</a>
+<a href="/buy/<%= product.id %>" class="btn btn-primary">Buy Now</a>
+
 <h3>Comments</h3>
 <% product.comment.forEach(comment => { %>
  <h4><%= comment.commentername %></h4>
