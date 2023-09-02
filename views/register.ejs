@@ -5,56 +5,73 @@
   <meta charset="utf-8">
   <title>Secrets</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/bootstrap-social.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+  <style>
+    body {
+        background-color: #f3f4f6;
+    }
+
+    /* Custom button styles */
+    .google-button {
+        background: linear-gradient(to right, #db4437, #e7715a);
+        padding: 10px 16px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .google-button:hover {
+        background: linear-gradient(to right, #e7715a, #db4437);
+    }
+
+    .facebook-button {
+        background: linear-gradient(to right, #1877f2, #166fe5);
+        padding: 10px 16px;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+
+    .facebook-button:hover {
+        background: linear-gradient(to right, #166fe5, #1877f2);
+    }
+</style>
 </head>
 
-<body>
-<div class="container mt-5">
-  <h1>Register</h1>
 
-  <div class="row">
-    <div class="col-sm-8">
-      <div class="card">
-        <div class="card-body">
-
-          <!-- Makes POST request to /register route -->
+    <body class="flex justify-center items-center h-screen">
+      <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full md:w-96">
+        <img src="https://flowbite.com/docs/images/logo.svg" alt="Company Logo" class="w-16 h-16 mx-auto -mt-10 rounded-full"> <br>
+          <h2 class="text-2xl font-semibold mb-6 text-center">Register</h2>
           <form action="/register" method="POST">
-            <div class="form-group">
-              <label for="name">Name</label>
-              <input type="name" class="form-control" name="name">
-            </div>
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" class="form-control" name="username">
-            </div>
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input type="password" class="form-control" name="password">
-            </div>
-            <button type="submit" class="btn btn-dark">Register</button>
+              <div class="mb-4">
+                  <label for="name" class="block text-gray-600 text-sm font-medium mb-2">Full Name</label>
+                  <input type="text" id="name" name="name" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" required>
+              </div>
+              <div class="mb-4">
+                  <label for="email" class="block text-gray-600 text-sm font-medium mb-2">Email</label>
+                  <input type="email" id="email" name="username" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" required>
+              </div>
+              <div class="mb-6">
+                  <label for="password" class="block text-gray-600 text-sm font-medium mb-2">Password</label>
+                  <input type="password" id="password" name="password" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" required>
+              </div>
+              <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg w-full">Register</button>
           </form>
-
-        </div>
+          <div class="my-3 text-center">
+              <span class="text-gray-500">or</span>
+          </div>
+          <div class="flex justify-center space-x-4 mb-6">
+              <a href="/auth/google" class="google-button text-white font-semibold rounded-lg flex items-center">
+                  <i class="fab fa-google mr-2"></i> Register with Google
+              </a>
+              <a href="/auth/facebook" class="facebook-button text-white font-semibold rounded-lg flex items-center">
+                  <i class="fab fa-facebook-f mr-2"></i> Register with Facebook
+              </a>
+          </div>
+          <div class="text-center">
+              <p class="text-gray-600">Already have an account? <a href="/login" class="text-blue-500 hover:underline">Login</a></p>
+          </div>
       </div>
-    </div>
+  </body>
 
-    <div class="col-sm-4">
-      <div class="card social-block">
-        <div class="card-body">
-          <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
-            <i class="fab fa-google"></i>
-            Sign Up with Google
-          </a>
-          <a class="btn btn-block btn-social btn-facebook" href="/auth/facebook" role="button">
-            <i class="fab fa-facebook"></i>
-            Sign Up with Facebook
-          </a>
-        </div>
-      </div>
-    </div>
-
-
-<%- include('partials/footer') %>

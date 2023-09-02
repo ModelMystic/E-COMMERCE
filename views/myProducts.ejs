@@ -1,25 +1,40 @@
 <%- include('partials/merHeader') %>
 
-<h2>Add New Product</h2>
-<a href="/newProduct">Create</a>
+<body class="bg-gray-100">
+
+
 
 <% products.forEach(product => { %>
 
-  
-  <div class="card" style="margin: 10px;">
-    <div class="row no-gutters">
-        <div class="col-auto">
-            <img src="<%= product.img %>" class="img-fluid " alt="" style="height: 17rem; width: 20rem;">
+
+
+<div class="container mx-auto p-4">
+    <div class="bg-white rounded-lg shadow-md p-8 flex items-center">
+        <!-- Larger Image -->
+        <a href="/myProduct/<%= product.id %>">
+        <div class="flex-shrink-0 mr-6">
+            <img src="<%= product.img %>" alt="Image" class="w-48 h-36 object-cover rounded">
         </div>
-        <div class="col">
-            <div class="card-block px-2" style="margin: 8px; position: relative;">
-                <h3 class="card-title"><%= product.name %></h3>
-                <h4 class="card-title"><%= product.price %></h4>
-                <h4 class="card-text"><%= product.brand %></h4>
-                <p class="card-text"><%= product.description.substring(0,100) %></p>
-                <a href="/myProduct/<%= product.id %>" class="btn btn-primary" style="position: absolute; left: 0.8rem; top: 13rem;">See Product</a>
-                <a href="/deleteProduct/<%= product.id %>" class="btn btn-primary" style="position: absolute; right: 0.8rem; top: 13rem;">Remove</a>
-            </div>
+    </a>
+        
+        <!-- Text Content -->
+        <a href="/myProduct/<%= product.id %>">
+        <div>
+            <h2 class="text-xl font-semibold"><%= product.name %></h2>
+            
+            <p class="text-gray-600"><%= product.description.substring(0,100) %></p>
+            <br>
+            <h3 class="text-xl font-semibold">$<%= product.price %></h3>
+        </div>
+    </a>
+    
+        
+        <!-- Buttons -->
+        <div class="ml-auto">
+            
+            <a href="/deleteProduct/<%= product.id %>">
+            <button class="bg-red-500 text-white font-semibold py-2 px-4 rounded-full">Delete</button>
+        </a>
         </div>
     </div>
 </div>
@@ -27,4 +42,14 @@
 
 <% }) %>
 
+
+<a href="/newProduct">
+<div class="text-center mt-6">
+    <button class="bg-indigo-500 text-white font-semibold py-2 px-4 rounded-full">
+        Create More Items
+    </button>
+</div></a>
+<br>
+
+</body>
 <%- include('partials/footer') %>

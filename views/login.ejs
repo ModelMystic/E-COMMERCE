@@ -5,63 +5,59 @@
   <meta charset="utf-8">
   <title>Secrets</title>
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/bootstrap-social.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.15/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css">
+
+    <style>
+      body {
+        background-color: #f3f4f6;
+    }
+    </style>
 </head>
 
-<body>
 
-<div class="container mt-5">
-  <h1>Login</h1>
 
-  <div class="row">
-    <div class="col-sm-8">
-      <div class="card">
-        <div class="card-body">
 
-          <!-- Makes POST request to /login route -->
-          <% var url; %>
+<body class="flex justify-center items-center h-screen">
+  <% var url; %>
           <% if (productID === "not") { %>
            <% url = "login" %>
           <% } else { %>
             <%  url = `/login/${productID}`  %>
             <% } %>
-          <form action=<%= url %> method="POST">
-            <div class="form-group">
-              <label for="email">Email</label>
-              <input type="email" class="form-control" name="username">
-            </div>
-            <div class="form-group">
-              <label for="password">Password</label>
-              <input type="password" class="form-control" name="password">
-            </div>
-            <button type="submit" class="btn btn-dark">Login</button>
-          </form>
-
-        </div>
+  <div class="relative bg-white p-8 rounded-lg shadow-lg max-w-md w-full md:w-96">
+   
+    <img src="https://flowbite.com/docs/images/logo.svg" alt="Company Logo" class="w-16 h-16 mx-auto -mt-10 rounded-full"> <br>
+      <h2 class="text-2xl font-semibold mb-6 text-center">Login</h2>
+      <form action=<%= url %> method="POST">
+          <div class="mb-4">
+              <label for="email" class="block text-gray-600 text-sm font-medium mb-2">Email</label>
+              <input type="email" id="email" name="username" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" required>
+          </div>
+          <div class="mb-6">
+              <label for="password" class="block text-gray-600 text-sm font-medium mb-2">Password</label>
+              <input type="password" id="password" name="password" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring focus:border-blue-300" required>
+          </div>
+          <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg w-full">Login</button>
+      </form>
+      <div class="my-6 text-center">
+          <span class="text-gray-500">or</span>
       </div>
-    </div>
-
-    <div class="col-sm-4">
-      <div class="card">
-        <div class="card-body">
-          <a class="btn btn-block btn-social btn-google" href="/auth/google" role="button">
-            <i class="fab fa-google"></i>
-            Sign In with Google
+      <div class="flex justify-center">
+          <a href="/auth/google" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg flex items-center mr-2">
+              <i class="fab fa-google mr-2"></i> Login with Google
           </a>
-          <a class="btn btn-block btn-social btn-facebook" href="/auth/facebook" role="button">
-            <i class="fab fa-facebook"></i>
-            Sign Up with Facebook
+          <a href="/auth/facebook" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg flex items-center">
+              <i class="fab fa-facebook-f mr-2"></i> Login with Facebook
           </a>
-        </div>
       </div>
+      <br><br>
+      <div class="text-center">
+        <a href="/register" class="text-blue-500 hover:underline">Sign up</a>
+        <span class="text-gray-500 mx-2">|</span>
+        <a href="#" class="text-blue-500 hover:underline">Forgot password</a>
     </div>
-
-  
-
   </div>
-</div>
+</body>
 
-<%- include('partials/footer') %>
+</html>

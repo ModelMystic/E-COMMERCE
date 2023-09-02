@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router();
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const mongoose = require("mongoose");
@@ -93,6 +94,136 @@ passport.deserializeUser(async (id, done) => {
 
 
 /////////////////////Buyer Side///////////////////
+
+merchantSchema.index({ name: 'text', 'sellername': 'text', 'products.name' : 'text', 'products.description' : 'text' });
+
+/////////search route////////
+// app.get("/search", async(req, res)=>{
+//   const searchTerm = req.body.search;
+//   const results = await Merchant.find({
+//     $or: [
+//       { $text: { $search: searchTerm } }, // Search in product name and description
+//       { 'products.text': { $regex: searchTerm, $options: 'i' } }, // Search in comments
+//     ],
+//   });
+//   console.log(results);
+// })
+
+app.get('/search', async (req, res) => {
+  const searchTerm = req.query.search; // User's search input
+  console.log(searchTerm);
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Search term is required' });
+  }
+  try {
+    const textSearchResults = await Merchant.find({
+      $text: { $search: searchTerm } // Search in merchant name
+    });
+
+    const sellerSearchResults = await Merchant.find({
+      'sellername': { $regex: searchTerm, $options: 'i' }// Search in merchant name
+    });
+
+    const productSearchResults = await Merchant.find({
+      'products.name': { $regex: searchTerm, $options: 'i' } // Search in products.name
+    });
+
+    const descriptionSearchResults = await Merchant.find({
+      'products.description': { $regex: searchTerm, $options: 'i' } // Search in products.description
+    });
+
+    // Combine and deduplicate results as needed
+
+    const combinedResults = [
+      ...textSearchResults,
+      ...sellerSearchResults,
+      ...productSearchResults,
+      ...descriptionSearchResults
+    ];
+
+    const deduplicatedResults = Array.from(new Set(combinedResults));
+
+    var arr = [];
+
+    deduplicatedResults.forEach(user => {
+      user.products.forEach(product => {
+        arr.push(product);
+      });
+    });
+
+  
+
+    const shuffledArr = arr.sort(() => Math.random() - 0.5);
+
+    if(deduplicatedResults) res.render("initialPage", {shuffledArr : shuffledArr})
+    else res.redirect("/")
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+app.get('/log/search', async (req, res) => {
+  if(req.isAuthenticated()){
+    
+  const searchTerm = req.query.search; // User's search input
+  console.log(searchTerm);
+  if (!searchTerm) {
+    return res.status(400).json({ error: 'Search term is required' });
+  }
+  try {
+    const textSearchResults = await Merchant.find({
+      $text: { $search: searchTerm } // Search in merchant name
+    });
+
+    const sellerSearchResults = await Merchant.find({
+      'sellername': { $regex: searchTerm, $options: 'i' }// Search in merchant name
+    });
+
+    const productSearchResults = await Merchant.find({
+      'products.name': { $regex: searchTerm, $options: 'i' } // Search in products.name
+    });
+
+    const descriptionSearchResults = await Merchant.find({
+      'products.description': { $regex: searchTerm, $options: 'i' } // Search in products.description
+    });
+
+    // Combine and deduplicate results as needed
+
+    const combinedResults = [
+      ...textSearchResults,
+      ...sellerSearchResults,
+      ...productSearchResults,
+      ...descriptionSearchResults
+    ];
+
+    const deduplicatedResults = Array.from(new Set(combinedResults));
+
+    var arr = [];
+
+    deduplicatedResults.forEach(user => {
+      user.products.forEach(product => {
+        arr.push(product);
+      });
+    });
+
+  
+
+    const shuffledArr = arr.sort(() => Math.random() - 0.5);
+
+    if(deduplicatedResults) res.render("home", {shuffledArr : shuffledArr})
+    else res.redirect("/home")
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+
+}else{
+  res.redirect("/login");
+}
+});
+
 
 ///initial Page/////
 app.get("/", function (req, res) {
@@ -190,7 +321,10 @@ app.get("/log/category/:categoryName", (req, res)=>{
     function(value) {
         value.forEach(user => {
           user.products.forEach(product => {
-            arr.push(product);
+            if(product.category === req.params.categoryName){
+              arr.push(product);
+            }
+            
           });
         });
 
@@ -201,7 +335,7 @@ app.get("/log/category/:categoryName", (req, res)=>{
     }
   );
   }else{
-    res.redirect("/initialPage");
+    res.redirect("/login");
   }
 });
 
@@ -259,6 +393,7 @@ app.get("/log/fullview/:productID", function(req, res){
 
 
 
+
 ///////comment handling///////
 
 app.post("/comment/:productID", async (req, res) => {
@@ -310,7 +445,7 @@ app.get("/profile", (req, res)=>{
 
 app.get("/editProfile", (req, res)=>{
   if(req.isAuthenticated()){
-    res.render("profileEditor", {name : req.user.name, sellername : req.user.sellername, email : req.user.username });
+    res.render("profileEditor", {name : req.user.name, sellername : req.user.sellername, email : req.user.username, web : "seller" });
   }else{
     res.redirect("/login");
   }
@@ -329,16 +464,41 @@ app.post("/editProfile", async(req, res)=>{
   }
 })
 
+app.get("/editProfile/merchant", (req, res)=>{
+  if(req.isAuthenticated()){
+    res.render("profileEditor", {name : req.user.name, sellername : req.user.sellername, email : req.user.username, web:"merchant"});
+  }else{
+    res.redirect("/merLogin");
+  }
+})
+
+app.post("/editProfile/merchant", async(req, res)=>{
+  if(req.isAuthenticated()){
+    req.user.name = req.body.name;
+    req.user.username = req.body.email;
+    req.user.sellername = req.body.sellername;
+
+    await req.user.save();
+    res.redirect("/merProfile");
+  }else{
+    res.redirect("/merLogin");
+  }
+})
+
 
 /////////////////add to cart/////////
 
 app.get("/myCart", (req, res)=>{
   if(req.isAuthenticated()){
-    res.render("myCart", {cart : req.user.cart});
+    var totalAmount = 0;
+    req.user.cart.forEach(product => {
+      totalAmount = totalAmount + product.price
+    });
+    res.render("myCart", {cart : req.user.cart, totalAmount : totalAmount});
   }else{
     res.redirect("/login");
   }
-})
+});
 
 app.get("/addToCart/:productID", (req, res)=>{
   if(req.isAuthenticated()){
@@ -377,7 +537,7 @@ app.get("/addToCart/:productID", (req, res)=>{
           })
   req.user.cart.push({productid : productID, name : name, img : img, category : category, brand : brand, description : description, price: price})
   await req.user.save();
-  res.render("myCart", {cart : req.user.cart});
+  res.redirect("/myCart");
       }
     );
   }else{
@@ -388,13 +548,16 @@ app.get("/addToCart/:productID", (req, res)=>{
 
 app.get("/deletefromcart/:productID", (req, res)=>{
   if (req.isAuthenticated()){
+    console.log("entered");
     var k = 0;
     req.user.cart.forEach(function(product){
       if (product.id === req.params.productID) {
+        console.log(product.id);
         async function myFunction() {
           req.user.cart.splice(k, 1);
 
           await req.user.save();
+          console.log("deleted");
   }
   myFunction().then(
    
@@ -428,7 +591,7 @@ app.get("/buy/:productID", (req, res)=>{
             user.products.forEach(async (product) =>{
               if(product.id === productID){
                 
-                res.render("addressPage", {addresses : req.user.address, productID : req.params.productID, amount : product.price});
+                res.render("addressPage", {addresses : req.user.address, productID : req.params.productID, amount : product.price, productname : product.name});
               }
             })
           })

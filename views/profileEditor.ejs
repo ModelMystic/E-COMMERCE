@@ -1,6 +1,13 @@
 <%- include('partials/shopfinalHead') %>
 
-<form action="/editProfile" method="POST">
+<% var url %>
+<% if (web === "merchant") { %>
+ <% url =  "/editProfile/merchant"%>
+<% } else{%>
+<% url = "/editProfile" %>
+    <% } %>
+
+<form action= <%= url %> method="POST">
 
     <h1>
         Name :

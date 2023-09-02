@@ -1,11 +1,103 @@
 <%- include('partials/merHeader') %>
 
-<h1><%= name %></h1>
-<h2><%= sellername %></h2>
-<h3><%= email %></h3>
-<h2><%= noOfProducts %></h2>
 
-<a href="/editProfile">Edit Profile</a>
+<% if (!sellername) { %>
+    <% sellername = "Not provided" %>
+   <% } %>
+   <body >
+           <div class="bg-white shadow-md rounded mx-auto px-8 py-6">
+               <div style="margin-left: 30px;">
+               
+               <h1 class="text-2xl font-semibold text-center mt-4">John Doe's Ecommerce Shop</h1>
+               
+               <!-- Personal Information -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Personal Information:</h2>
+                   <ul class="list-disc pl-6">
+                       <li><strong>Full Name:</strong> <%= name %></li>
+                       <li><strong>Sellername:</strong> <%= sellername %></li>
+                       <li><strong>Email:</strong> <%= email %></li>
+                       <li><strong>Phone Number:</strong> (555) 555-5555</li>
+                       <li><strong>Location:</strong> New York, NY</li>
+                   </ul>
+               </div>
+               
+               <!-- Account Details -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Account Details:</h2>
+                   <ul class="list-disc pl-6">
+                       <li><strong>Account Type:</strong> Customer</li>
+                       <li><strong>Member Since:</strong> January 15, 2020</li>
+                       <li><strong>Total Orders:</strong> 27</li>
+                       <li><strong>Total Spent:</strong> $1,245.78</li>
+                   </ul>
+               </div>
+   
+               <!-- Shipping Information -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Shipping Information:</h2>
+                   <p>123 Main Street<br>Apartment 4B<br>New York, NY 10001</p>
+               </div>
+   
+               <!-- Billing Information -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Billing Information:</h2>
+                   <p>123 Main Street<br>Apartment 4B<br>New York, NY 10001</p>
+               </div>
+   
+               <!-- Payment Methods -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Payment Methods:</h2>
+                   <ul class="list-disc pl-6">
+                       <li><strong>Credit Card:</strong> **** **** **** 1234 (Expires: 05/25)</li>
+                       <li><strong>PayPal:</strong> johndoe@email.com</li>
+                   </ul>
+               </div>
+   
+               <!-- Order History -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Order History:</h2>
+                   <!-- Replace with your order history entries -->
+               </div>
+   
+               <!-- Wishlist -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Wishlist:</h2>
+                   <!-- Replace with your wishlist entries -->
+               </div>
+   
+               <!-- Reviews and Ratings -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Reviews and Ratings:</h2>
+                   <!-- Replace with your reviews and ratings entries -->
+               </div>
+   
+               <!-- Settings -->
+               <div class="mt-6">
+                   <h2 class="text-lg font-semibold">Settings:</h2>
+                   <ul class="list-disc pl-6">
+                       <li><a href="#">Change Password</a></li>
+                       <li><input type="checkbox" id="emailNotifications" class="mr-2" checked><label for="emailNotifications">Receive promotional emails</label></li>
+                       <li><input type="checkbox" id="privacySettings" class="mr-2" checked><label for="privacySettings">Allow others to see my reviews and ratings</label></li>
+                   </ul>
+               </div>
+               <br><br>
+               <div class="mt-4">
+                <a href="/editProfile/merchant">
+                <button id="checkout-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring focus:ring-indigo-300">Edit Profile</button>
+            </a>
+            </div>
+   
+               <!-- Logout -->
+               <div class="mt-6">
+                   <a href="/logout" class="text-blue-500 hover:underline">Logout</a>
+               </div>
+           </div>
+           </div>
+   
+   
+   
+   </body>
 
 
 <%- include('partials/footer') %>
