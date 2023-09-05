@@ -5,7 +5,7 @@
    <% shuffledArr.forEach(element => { %>
     
       <div class="bg-white rounded-lg shadow-md p-4">
-        <a href="/fullview/<%= element.id %>">
+        <a href="/log/fullview/<%= element.id %>">
         <div class="relative w-full" style="padding-bottom: 100%;">
           <img src="<%= element.img %>" alt="Product 1" class="absolute inset-0 w-full h-full object-cover">
       </div>
@@ -31,5 +31,9 @@
    <% }) %>
   </div>
 </section>
+
+
+
+
 
 <%- include('partials/footer') %>

@@ -1,0 +1,9 @@
+.current-user-chat{
+    text-align: right;
+    margin: 10px;
+    color: black;
+}
+
+#chat-section{
+    display: none;
+}

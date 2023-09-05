@@ -1,4 +1,5 @@
 const express = require("express");
+
 const router = express.Router();
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -12,10 +13,15 @@ const findOrCreate = require("mongoose-findorcreate");
 const { futimes } = require("fs");
 
 const app = express();
+const http = require("http");
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
 
-app.use(express.static("public"));
 
 app.set("view engine", "ejs");
+app.use(express.static(__dirname + '/public'));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
@@ -28,8 +34,43 @@ app.use(
   
   app.use(passport.initialize());
   app.use(passport.session());
+
   
   mongoose.connect("mongodb://localhost:27017/commerceDB");
+
+  const virtualcartSchema = new mongoose.Schema({
+    name : String,
+    creatorID : String,
+    connections : [{
+      connectionid : String,
+    }],
+
+    productID : [{
+      productid : String,
+    }]
+  }
+  );
+
+  const VirtualCart = new mongoose.model("VirtualCart", virtualcartSchema);
+
+  const chatSchema = new mongoose.Schema({
+    sender_id : {
+      type : mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    receiver_id : {
+      type : mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+    message : {
+      type : String,
+      required : true
+    }
+  },
+  {timestamps:true}
+  );
+
+  const Chat = new mongoose.model("Chat", chatSchema);
 
 
   const merchantSchema = new mongoose.Schema({
@@ -37,6 +78,10 @@ app.use(
     password: String,
     name: String,
     sellername : String,
+    is_online : {
+      type : String,
+      default : "0",
+    },
     address : [{
       fullname : String,
       mobilenumber : String,
@@ -64,6 +109,8 @@ app.use(
     category : String,
     brand : String,
     description : String,
+    sellername : String,
+    sellerid : mongoose.Schema.Types.ObjectId,
     comment : [{
       commentername : String,
       comm : String
@@ -91,6 +138,65 @@ passport.deserializeUser(async (id, done) => {
     done(null, USER);
   });
 
+// var usp = io.of('/home');
+
+// usp.on('connection', function(socket){
+//   console.log("user connected");
+
+//   socket.on('disconnect', function(){
+//     console.log('Disconnected');
+//   })
+// });
+
+// var usp = io.of('http://localhost:3000/home');
+// usp.on('connection', (socket) => {
+//   console.log('A user connected');
+
+
+//   socket.on('disconnect', () => {
+//     console.log('A user disconnected');
+//   });
+// });
+
+
+
+var usp = io.of('/user-namespace');
+
+usp.on('connection', async function(socket){
+  console.log("a user connected");
+
+  var userId = socket.handshake.auth.token;
+
+  await Merchant.findByIdAndUpdate({ _id : userId }, {$set : { is_online : '1'}});
+
+  socket.broadcast.emit('getOnlineUser', { user_id : userId });
+  socket.on('disconnect', async function(){
+    await Merchant.findByIdAndUpdate({ _id : userId }, {$set : { is_online : '0'}});
+    console.log("user gets disconnectd");
+    socket.broadcast.emit('getOfflineUser', { user_id : userId });
+  });
+
+
+  ////chatting implementation
+
+  socket.on('newChat', function(data){
+    socket.broadcast.emit('loadNewChat', data);
+  })
+
+  socket.on('existsChat', async function(data){
+    var chats = await Chat.find({ $or : [
+      {sender_id : data.sender_id, receiver_id : data.receiver_id},
+      {sender_id : data.receiver_id, receiver_id : data.sender_id}
+    ]});
+
+    console.log(chats);
+    socket.emit('loadChats', {chats : chats});
+  })
+})
+
+
+
+
 
 
 /////////////////////Buyer Side///////////////////
@@ -108,6 +214,7 @@ merchantSchema.index({ name: 'text', 'sellername': 'text', 'products.name' : 'te
 //   });
 //   console.log(results);
 // })
+
 
 app.get('/search', async (req, res) => {
   const searchTerm = req.query.search; // User's search input
@@ -374,11 +481,14 @@ app.get("/log/fullview/:productID", function(req, res){
   myFunction().then(
    
     function(value) {
+      //////dont change any thing its value at all //////////
 
-        value.forEach(user=>{
-          user.products.forEach(product =>{
+        value.forEach(seller=>{
+          seller.products.forEach(product =>{
             if(product.id === req.params.productID){
-              res.render("logProductView", {product : product});
+              var userID = req.user._id;
+              console.log(userID);
+              res.render("logProductView", {product : product, user : req.user, userID, seller : seller });
             }
           })
         })
@@ -787,6 +897,9 @@ app.post("/newProduct", async function(req, res){
     const brand = req.body.brandName;
     const description = req.body.description;
 
+    console.log(req.user.id);
+    const sellerid = req.user.id;
+
     if(req.isAuthenticated()){
       const product = {
         name : name,
@@ -794,7 +907,9 @@ app.post("/newProduct", async function(req, res){
         img : imgLink,
         category : category,
         brand : brand,
-        description : description
+        description : description,
+        sellername : req.user.sellername,
+        sellerid : sellerid,
       }
       await Merchant.findByIdAndUpdate(req.user.id, { $push : {products : product}}) ;  
       res.redirect("/merHome");   
@@ -971,8 +1086,75 @@ app.get("/merRegister", function (req, res) {
   });
 
 
+  app.get("/merChat", function(req, res){
+    if(req.isAuthenticated()){
+      async function myFunction() {
+
+          return await Merchant.find({});
+        }
+
+        myFunction().then(
+          function(merchants){
+              res.render("merChat", {merchants : merchants, userID : req.user._id});
+          }
+        )
+      
+      
+  }else{
+      res.redirect("/merLogin")
+  }
+  });
+
+  app.post("/save-chat", async function(req, res){
+    if(req.isAuthenticated()){
+
+      
+      try{
+        var chat = new Chat({
+          sender_id : req.body.sender_id,
+          receiver_id : req.body.receiver_id,
+          message : req.body.message,
+        })
+
+        var newChat = await chat.save();
+        res.status(200).send({success : true, msg: "Chat inserted", data:newChat });
+      }catch(error){
+        res.status(400).send({success : false, msg : error.message});
+      }
+    }else{
+      res.redirect("/login");
+    }
+  });
+
+  app.get("/delete-chat/:deleteID", async function(req, res){
+    if(req.isAuthenticated()){
+      var chatID = req.params.deleteID;
+      await Chat.findByIdAndDelete(chatID);
+      res.redirect('back');
+    }else{
+      res.redirect("/login");
+    }
+  })
+
+
 //////////////////////////MERCHANT SIDE ENDS///////////
 
-app.listen(3000, function () {
+
+
+///////Virtual Cart/////////
+app.get("/virtualCart", async function(req, res){
+  if(req.isAuthenticated()){
+    var virtualCarts = await VirtualCart.find({});
+    res.render("virtualCart", {virtualCarts : virtualCarts});
+  }else{
+    res.redirect("/login");
+  }
+});
+
+// app.get("/createVirtualCart", function(req, res){
+
+// })
+
+server.listen(3000, function () {
     console.log("Server started on port 3000.");
   });
