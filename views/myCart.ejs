@@ -30,6 +30,37 @@
                     <a href="/buy/<%= element.productid %>">
                         <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-3 py-1 rounded" style="margin-left: 10px; margin-right: 10px;">Buy Now</button>
                         </a>
+
+                    
+                    <button data-popover-target="popover-click" data-popover-trigger="click" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Click popover</button>
+                    <div data-popover id="popover-click" role="tooltip" class="absolute z-10 invisible inline-block w-64 text-sm text-gray-500 transition-opacity duration-300 bg-white border border-gray-200 rounded-lg shadow-sm opacity-0 dark:text-gray-400 dark:border-gray-600 dark:bg-gray-800">
+                        <div class="px-3 py-2 bg-gray-100 border-b border-gray-200 rounded-t-lg dark:border-gray-600 dark:bg-gray-700">
+                            <h3 class="font-semibold text-gray-900 dark:text-white">Popover click</h3>
+                        </div>
+                        <div class="px-3 py-2">
+                            <h3>Cart Created By user</h3>
+
+                            <% cartCreatedByUser.forEach(virtualCart => { %>
+
+                            <a href="/addToVc/<%= element.productid %>/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
+                            
+                            <% }) %>
+
+
+                            <h3>Cart Joined By user</h3>
+
+                            <% cartJoinedByUser.forEach(virtualCart => { %>
+
+                                <%= element.productid %>
+
+                            <a href="/addToVc/<%= element.productid %>/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
+
+                            <% }) %>
+
+                        </div>
+                        <div data-popper-arrow></div>
+                    </div>
+                    
                         <input type="number" value="1" class="w-12 border border-gray-300 rounded-md text-center" style="width: 60px;">
                     </div>
                     

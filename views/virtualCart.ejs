@@ -1,9 +1,31 @@
 <%- include('partials/shopfinalHead') %>
 
-<a href="/createVirtualCart">Create New</a>
+<form action= "/createVirtualCart" method="post">
+    <input type="text" name="virtualCartName" placeholder="Give name to your cart"></input>
+    <button class="btn btn-primary" type="submit" name="button">Create New VC</button>
+</form>
 
-<% virtualCarts.forEach(virtualCart => { %>
+<form action= "/joinVirtualCart" method="post">
+    <input type="text" name="virtualCartCode" placeholder="Type Code"></input>
+    <button class="btn btn-primary" type="submit" name="button">Join VC</button>
+</form>
+
+
+<h3>Cart Created By user</h3>
+
+<% cartCreatedByUser.forEach(virtualCart => { %>
+
+ <a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
  
+<p>Share this key for your friends to join: <%= virtualCart.id %></p>
+<% }) %>
+
+<h3>Cart Joined By user</h3>
+
+<% cartJoinedByUser.forEach(virtualCart => { %>
+
+ <a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
+
 <% }) %>
 
 <%- include('partials/footer') %>

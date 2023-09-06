@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 
 const router = express.Router();
@@ -18,6 +19,8 @@ const socketIo = require('socket.io');
 const server = http.createServer(app);
 const io = socketIo(server);
 
+var GoogleStrategy = require("passport-google-oauth2").Strategy;
+var FacebookStrategy = require("passport-facebook").Strategy;
 
 app.set("view engine", "ejs");
 app.use(express.static(__dirname + '/public'));
@@ -39,14 +42,24 @@ app.use(
   mongoose.connect("mongodb://localhost:27017/commerceDB");
 
   const virtualcartSchema = new mongoose.Schema({
-    name : String,
+    cartname : String,
     creatorID : String,
+    creatorname : String,
     connections : [{
       connectionid : String,
+      connectionname : String,
     }],
 
     productID : [{
       productid : String,
+      name : String,
+      img : {type : String},
+      price : Number,
+      category : String,
+      brand : String,
+      description : String,
+      adderid : String,
+      addername : String,
     }]
   }
   );
@@ -78,6 +91,8 @@ app.use(
     password: String,
     name: String,
     sellername : String,
+    googleId: String,
+    facebookId: String,
     is_online : {
       type : String,
       default : "0",
@@ -137,6 +152,56 @@ passport.deserializeUser(async (id, done) => {
     const USER = await Merchant.findById(id);
     done(null, USER);
   });
+
+
+
+  
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: "http://localhost:3000/auth/google/home",
+      passReqToCallback: true,
+    },
+    function (request, accessToken, refreshToken, profile, done) {
+      Merchant.findOrCreate(
+        {
+          googleId: profile.id,
+          username: profile.email,
+          name: profile.displayName,
+        },
+        function (err, user) {
+          return done(err, user);
+        }
+      );
+    }
+  )
+);
+
+
+passport.use(
+  new FacebookStrategy(
+    {
+      clientID: process.env.FACEBOOK_APP_ID,
+      clientSecret: process.env.FACEBOOK_APP_SECRET,
+      callbackURL: "http://localhost:3000/auth/facebook/home",
+    },
+    function (accessToken, refreshToken, profile, cb) {
+      Merchant.findOrCreate(
+        {
+          facebookId: profile.id,
+          username: profile.displayName,
+          name: profile.displayName,
+        },
+        function (err, user) {
+          return cb(err, user);
+        }
+      );
+    }
+  )
+);
+
 
 // var usp = io.of('/home');
 
@@ -598,13 +663,29 @@ app.post("/editProfile/merchant", async(req, res)=>{
 
 /////////////////add to cart/////////
 
-app.get("/myCart", (req, res)=>{
+app.get("/myCart", async (req, res)=>{
   if(req.isAuthenticated()){
     var totalAmount = 0;
     req.user.cart.forEach(product => {
-      totalAmount = totalAmount + product.price
+      totalAmount = totalAmount + product.price;
     });
-    res.render("myCart", {cart : req.user.cart, totalAmount : totalAmount});
+
+    var cartCreatedByUser = [];
+    var cartJoinedByUser = [];
+    var virtualCarts = await VirtualCart.find({});
+
+    virtualCarts.forEach(virtualCart => {
+      if(virtualCart.creatorID === req.user.id){
+        cartCreatedByUser.push(virtualCart);
+      }
+
+      virtualCart.connections.forEach(connection => {
+        if(connection.connectionid === req.user.id){
+          cartJoinedByUser.push(virtualCart);
+        }
+      });
+    });
+    res.render("myCart", {cart : req.user.cart, totalAmount : totalAmount, cartCreatedByUser : cartCreatedByUser, cartJoinedByUser : cartJoinedByUser});
   }else{
     res.redirect("/login");
   }
@@ -798,6 +879,31 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["email", "profile"] })
+);
+
+app.get(
+  "/auth/google/home",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    res.redirect("/home");
+  }
+);
+
+app.get("/auth/facebook", passport.authenticate("facebook"));
+
+app.get(
+  "/auth/facebook/home",
+  passport.authenticate("facebook", { failureRedirect: "/login" }),
+  function (req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/home");
+  }
+);
+
+
 
 app.get("/login/:productID", (req, res)=>{
   res.render("login", {productID : req.params.productID} );
@@ -857,16 +963,23 @@ app.get("/logout", (req, res) => {
 
 app.get("/merHome", (req, res)=>{
     if(req.isAuthenticated()){
+
+      if(req.user.sellername == null){
+        res.render("addSellerName", {name : req.user.name, email : req.user.username});
+      }else{
+
         async function myFunction() {
 
-            return await Merchant.find({});
-          }
+          return await Merchant.find({});
+        }
 
-          myFunction().then(
-            function(merchants){
-                res.render("merHome", {merchants : merchants});
-            }
-          )
+        myFunction().then(
+          function(merchants){
+              res.render("merHome", {merchants : merchants});
+          }
+        )
+      
+      }
         
         
     }else{
@@ -1015,6 +1128,21 @@ app.get("/deleteProduct/:productID", function(req, res){
     }
   })
 
+
+app.post("/addSellerName", async function(req, res){
+  if(req.isAuthenticated()){
+    var email = req.body.email;
+    var sellername = req.body.sellername;
+    req.user.sellername = sellername;
+    req.user.username = email;
+
+    await req.user.save();
+    res.redirect("/merHome");
+  }else{
+    res.redirect("/merLogin");
+  }
+})
+
 ////////////merProfile///////////////////
 app.get("/merProfile", (req, res)=>{
     if(req.isAuthenticated()){
@@ -1144,16 +1272,176 @@ app.get("/merRegister", function (req, res) {
 ///////Virtual Cart/////////
 app.get("/virtualCart", async function(req, res){
   if(req.isAuthenticated()){
+    var cartCreatedByUser = [];
+    var cartJoinedByUser = [];
     var virtualCarts = await VirtualCart.find({});
-    res.render("virtualCart", {virtualCarts : virtualCarts});
+
+    virtualCarts.forEach(virtualCart => {
+      if(virtualCart.creatorID === req.user.id){
+        cartCreatedByUser.push(virtualCart);
+      }
+
+      virtualCart.connections.forEach(connection => {
+        if(connection.connectionid === req.user.id){
+          cartJoinedByUser.push(virtualCart);
+        }
+      });
+    });
+    res.render("virtualCart", {cartCreatedByUser : cartCreatedByUser , cartJoinedByUser : cartJoinedByUser});
   }else{
     res.redirect("/login");
   }
 });
 
-// app.get("/createVirtualCart", function(req, res){
+app.post("/createVirtualCart", async function(req, res){
+  if(req.isAuthenticated()){
+    console.log(req.body.virtualCartName);
+    const newCart = new VirtualCart ({
+      cartname : req.body.virtualCartName,
+      creatorID : req.user.id,
+      creatorname : req.user.name,
+    });
 
-// })
+    await newCart.save();
+    res.redirect("/virtualCart");
+  }else{
+    res.redirect("/");
+  }
+});
+
+app.get("/openVirtualCart/:virtualCartID", async function(req, res){
+  if(req.isAuthenticated()){
+    var virtualCartID = req.params.virtualCartID;
+    console.log(virtualCartID);
+    var virtualCart = await VirtualCart.findById(virtualCartID).exec();
+    console.log(virtualCart);
+
+    res.render("showVirtualCart", {virtualCart : virtualCart});
+    
+  }else{
+    res.redirect("/login");
+  }
+})
+
+app.post("/joinVirtualCart", function(req, res){
+  if(req.isAuthenticated()){
+    var id = req.body.virtualCartCode;
+    async function myFunction() {
+  
+      return await VirtualCart.find({});
+    }
+    myFunction().then(
+     
+      function(VirtualCarts) {
+  
+          
+            VirtualCarts.forEach(async (virtualCart) =>{
+              if(virtualCart.id === id){
+                virtualCart.connections.push({ connectionid: req.user.id , connectionname : req.user.name});
+                await virtualCart.save();
+                res.redirect("/virtualCart");
+              }
+            })
+  
+  
+      }
+    );
+  }else{
+    res.redirect("/login");
+  }
+});
+
+app.get("/addToVc/:productID/:virtualCartID", function(req, res){
+  if(req.isAuthenticated()){
+    var productID = req.params.productID;
+    var virtualCartID = req.params.virtualCartID;
+
+    async function myFunction() {
+
+      return await Merchant.find({"products": {$ne : null}} );
+    }
+    myFunction().then(
+     
+      function(value) {
+          value.forEach(user => {
+            user.products.forEach(product => {
+              if(product.id === productID){
+                console.log("productid" + product.id);
+                var name = product.name;
+                var img = product.img;
+                var price = product.price;
+                var category = product.category;
+                var brand = product.brand;
+                var description = product.description;
+                
+                async function myFunction() {
+  
+                  return await VirtualCart.find({});
+                }
+                myFunction().then(
+                 
+                  function(VirtualCarts) {
+              
+                      
+                        VirtualCarts.forEach(async (virtualCart) =>{
+                          if(virtualCart.id === virtualCartID){
+                            console.log("virtualcartid" + virtualCart.id)
+                            virtualCart.productID.push({ productid: productID , name : name, img : img, price : price, category : category, brand : brand, description : description, adderid : req.user.id, addername : req.user.name});
+                            await virtualCart.save();
+                            res.redirect(`/openVirtualCart/${virtualCartID}`);
+                          }
+                        })
+              
+              
+                  }
+                );
+
+              }
+            });
+          });
+  
+        
+  
+          
+      }
+    );
+
+   
+  }else{
+    res.redirect("/login");
+  }
+});
+
+app.get("/deletefromVC/:virtualCartID/:productID", async function(req, res){
+  if(req.isAuthenticated()){
+    var virtualCartID = req.params.virtualCartID;
+    var productID = req.params.productID;
+
+    var virtualCart = await VirtualCart.findById(virtualCartID);
+    var k = 0;
+    virtualCart.productID.forEach(function(product){
+      if (product.productid === productID) {
+        console.log(product.id);
+        async function myFunction() {
+          virtualCart.productID.splice(k, 1);
+
+          await virtualCart.save();
+          console.log("deleted");
+  }
+  myFunction().then(
+   
+    function(value) {
+      res.redirect(`/openVirtualCart/${virtualCartID}`);
+    }
+  );
+      }
+      k++;
+    });
+
+  }else{
+    res.redirect("/login");
+  }
+})
 
 server.listen(3000, function () {
     console.log("Server started on port 3000.");
