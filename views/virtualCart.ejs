@@ -1,31 +1,53 @@
 <%- include('partials/shopfinalHead') %>
 
-<form action= "/createVirtualCart" method="post">
-    <input type="text" name="virtualCartName" placeholder="Give name to your cart"></input>
-    <button class="btn btn-primary" type="submit" name="button">Create New VC</button>
-</form>
+<body class="bg-gray-100 p-4">
+    <br>
 
-<form action= "/joinVirtualCart" method="post">
-    <input type="text" name="virtualCartCode" placeholder="Type Code"></input>
-    <button class="btn btn-primary" type="submit" name="button">Join VC</button>
-</form>
+    <div class="max-w-x1 mx-auto bg-white p-4 rounded shadow-md">
+        <div class="mb-4">
+            <form action= "/createVirtualCart" method="post">
+            <input type="text" name="virtualCartName" id="nameInput1" class="w-full border border-gray-300 rounded p-2" placeholder="Give name to your cart">
+            <button id="addButton1" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white rounded p-2">Create New VC</button>
+        </form>
+        </div>
+    
 
+    <div class="mb-4">
+        <form action= "/joinVirtualCart" method="post">
+        <input type="text" id="nameInput2" name="virtualCartCode" class="w-full border border-gray-300 rounded p-2" placeholder="Type Code for join VC!">
+        <button id="addButton2" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white rounded p-2">Add Name</button>
+    </form>
+    </div>
 
-<h3>Cart Created By user</h3>
+    <div>
+        <h2 class="text-lg font-semibold mb-2">VC's created by you!:</h2>
+        <ul id="nameList" class="list-disc list-inside">
+            <!-- Names will be added dynamically here -->
+            <% cartCreatedByUser.forEach(virtualCart => { %>
 
-<% cartCreatedByUser.forEach(virtualCart => { %>
+                <li><a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a></li>
+                
+               <p>Share this key for your friends to join: <%= virtualCart.id %></p>
+               <br>
+               <% }) %>
+        </ul>
+    </div>
 
- <a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
- 
-<p>Share this key for your friends to join: <%= virtualCart.id %></p>
-<% }) %>
+    <div>
+        <h2 class="text-lg font-semibold mb-2">VC's joined by you!:</h2>
+        <ul id="nameList" class="list-disc list-inside">
+            <!-- Names will be added dynamically here -->
+            <% cartJoinedByUser.forEach(virtualCart => { %>
 
-<h3>Cart Joined By user</h3>
+               <li> <a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a></li>
+               <br>
+               
+               <% }) %>
+        </ul>
+    </div>
+</div>
+<br><br><br>
 
-<% cartJoinedByUser.forEach(virtualCart => { %>
-
- <a href="/openVirtualCart/<%= virtualCart.id %>"><%= virtualCart.cartname %></a>
-
-<% }) %>
+</body>
 
 <%- include('partials/footer') %>

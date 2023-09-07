@@ -1,0 +1,87 @@
+<%- include('partials/shopfinalHead') %>
+
+<img src="https://ethicsinfotech.in/uploads/slider/e-commerce-website.png" alt="" style="height: 650px;">
+
+<br>
+
+<h2>Top beauty Brands</h2>
+<% if (beautyarr.length > 0) { %>
+ 
+    <div class="item-container p-4" style="overflow-x: scroll; white-space: nowrap;">
+        
+        <!-- Add more items as needed -->
+        <% beautyarr.forEach(element => { %>
+            <a href="/fullview/<%= element.id %>">
+        <div class="item flex-shrink-0" >
+            <div class="w-40 h-32 bg-gray-300 p-4">
+                <img src="<%= element.img %>" alt="Item 1 Image" class="w-full h-full object-cover" style="width: 150px; height: 200px;" />
+                <br><h3 style="color: black;"><%= element.name %></h3>
+                <h3>$<%= element.price %></h3>
+            </div>
+        </div>
+        </a>
+        <% }) %>
+    </div>
+    
+    <% } %>
+
+<% if (electronicProductsArr.length > 0) { %>
+ 
+<h1>Electronic Items</h1>
+<div class="item-container p-4" style="overflow-x: scroll; white-space: nowrap;">
+    
+    <!-- Add more items as needed -->
+    <% electronicProductsArr.forEach(element => { %>
+        <a href="/fullview/<%= element.id %>">
+    <div class="item flex-shrink-0" >
+        <div class="w-40 h-32 bg-gray-300 p-4">
+            <img src="<%= element.img %>" alt="Item 1 Image" class="w-full h-full object-cover" style="width: 150px; height: 200px;" />
+            <br><h3 style="color: black;"><%= element.name %></h3>
+            <h3>$<%= element.price %></h3>
+        </div>
+    </div>
+    </a>
+    <% }) %>
+</div>
+
+<% } %>
+
+
+
+<section class="container mx-auto my-8">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+   <% shuffledArr.forEach(element => { %>
+    
+      <div class="bg-white rounded-lg shadow-md p-4">
+        <a href="/log/fullview/<%= element.id %>">
+        <div class="relative w-full" style="padding-bottom: 100%;">
+          <img src="<%= element.img %>" alt="Product 1" class="absolute inset-0 w-full h-full object-cover">
+      </div>
+          <h2 class="text-lg font-semibold mt-2"><%= element.name %></h2>
+          <p class="text-gray-600"><%= element.description.substring(0,20) + "..." %></p>
+        </a>
+          <div class="mt-4 flex justify-between items-center">
+            <span class="text-xl font-bold">$<%= element.price %></span>
+            <div class="flex space-x-4">
+              <a href="/addToCart/<%= element.id %>">
+                <button class="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600">Add to Cart</button>
+              </a>
+              <a href="/buy/<%= element.id %>">
+                <button class="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600">Buy Now</button>
+              </a>
+            </div>
+          </div>
+      </div>
+
+      <!-- Repeat similar product cards for other products -->
+
+
+   <% }) %>
+  </div>
+</section>
+
+
+
+
+
+<%- include('partials/footer') %>

@@ -397,6 +397,8 @@ app.get('/log/search', async (req, res) => {
 });
 
 
+
+
 ///initial Page/////
 app.get("/", function (req, res) {
   var arr = [];
@@ -406,17 +408,48 @@ app.get("/", function (req, res) {
   }
   myFunction().then(
    
-    function(value) {
+    async function(value) {
         value.forEach(user => {
           user.products.forEach(product => {
             arr.push(product);
           });
         });
 
+        var electronicProductsArr = []
+
+        var electronicProducts =  await Merchant.find({"products": { $elemMatch: {
+          "category": "electronic"
+        }}} );
+
+        electronicProducts.forEach(user => {
+          user.products.forEach(product => {
+            if(product.category === "electronic"){
+              electronicProductsArr.push(product);
+            }
+          });
+        });
+
+        var beautyAndPersonalCareArr = [];
+
+        var beautyAndPersonalCare =  await Merchant.find({"products": { $elemMatch: {
+          "category": "beautyAndPersonalCare"
+        }}} );
+
+        
+
+        beautyAndPersonalCare.forEach(user => {
+          user.products.forEach(product => {
+            if(product.category === "beautyAndPersonalCare"){
+              beautyAndPersonalCareArr.push(product);
+            }
+          });
+        });
+
+
       
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
-        res.render("initialPage", {shuffledArr : shuffledArr});
+        res.render("openpage", {shuffledArr : shuffledArr, electronicProductsArr : electronicProductsArr, beautyarr : beautyAndPersonalCareArr});
     }
   );
 });
@@ -432,18 +465,48 @@ app.get("/home", (req, res)=>{
   }
   myFunction().then(
    
-    function(value) {
+    async function(value) {
         value.forEach(user => {
           user.products.forEach(product => {
             arr.push(product);
           });
         });
 
-      
+        var electronicProductsArr = []
+
+        var electronicProducts =  await Merchant.find({"products": { $elemMatch: {
+          "category": "electronic"
+        }}} );
+
+        electronicProducts.forEach(user => {
+          user.products.forEach(product => {
+            if(product.category === "electronic"){
+              electronicProductsArr.push(product);
+            }
+          });
+        });
+
+       
+        var beautyAndPersonalCareArr = [];
+
+        var beautyAndPersonalCare =  await Merchant.find({"products": { $elemMatch: {
+          "category": "beautyAndPersonalCare"
+        }}} );
+
+        
+
+        beautyAndPersonalCare.forEach(user => {
+          user.products.forEach(product => {
+            if(product.category === "beautyAndPersonalCare"){
+              beautyAndPersonalCareArr.push(product);
+            }
+          });
+        });
+
 
         const shuffledArr = arr.sort(() => Math.random() - 0.5);
 
-        res.render("home", {shuffledArr : shuffledArr});
+        res.render("logopenpage", {shuffledArr : shuffledArr, electronicProductsArr : electronicProductsArr, beautyarr : beautyAndPersonalCareArr});
     }
   );
   }else{
@@ -467,7 +530,9 @@ app.get("/category/:categoryName", (req, res)=>{
     function(value) {
         value.forEach(user => {
           user.products.forEach(product => {
-            arr.push(product);
+            if(product.category === req.params.categoryName){
+              arr.push(product);
+            }
           });
         });
 
@@ -590,7 +655,7 @@ app.post("/comment/:productID", async (req, res) => {
               if(product.id === productID){
                 product.comment.push({ commentername: req.user.name , comm : comment});
                 await user.save();
-                res.redirect(`/fullview/${req.params.productID}`);
+                res.redirect("back");
               }
             })
           })
@@ -611,7 +676,8 @@ app.get("/profile", (req, res)=>{
           name : req.user.name,
           sellername : req.user.sellername,
           email : req.user.username,
-          noOfProducts : req.user.products.length
+          noOfProducts : req.user.products.length,
+          addresses : req.user.address
       })
   }else{
       res.redirect("/login");
@@ -1150,7 +1216,8 @@ app.get("/merProfile", (req, res)=>{
             name : req.user.name,
             sellername : req.user.sellername,
             email : req.user.username,
-            noOfProducts : req.user.products.length
+            noOfProducts : req.user.products.length,
+            addresses : req.user.address,
         })
     }else{
         res.redirect("/merLogin");

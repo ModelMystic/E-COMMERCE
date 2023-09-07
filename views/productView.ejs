@@ -1,30 +1,49 @@
 <%- include('partials/shopperHeader') %>
 
-<img src="<%= product.img %>" alt="">
-<h2><%= product.name %></h2>
-<h4><%= product.price %></h4>
-<h2><%= product.brand %></h2>
-<h4><%= product.category %></h4>
-<h4><%= product.sellername %></h4>
-
-<p><%= product.description %></p>
-
-<a href="/addToCart/<%= product.id %>" class="btn btn-primary">Add to cart</a>
-<a href="/buy/<%= product.id %>" class="btn btn-primary">Buy Now</a>
-
-<h3>Comments</h3>
-<% product.comment.forEach(comment => { %>
- <h4><%= comment.commentername %></h4>
- <p><%= comment.comm %></p>
-<% }) %>
-
-
-<form action="/comment/<%= product.id %>" method="POST">
-    <div class="form-group">
-        <input class="form-control" type="text" name="comment">
+    <!-- Product Details -->
+    <div class="container mx-auto p-8 "> <!-- Increased padding -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <!-- Product Image -->
+          <div class="w-full">
+              <img src="<%= product.img %>" alt="Product Image" class="w-full rounded-lg">
+          </div>
+          <!-- Product Information -->
+          <div>
+              <h1 class="text-3xl font-semibold"><%= product.name %></h1>
+              <p class="text-gray-600">Category: <a href="/category/<%= product.category %>" class="text-blue-500 hover:underline"><%= product.category %></a></p><br>
+              <p class="text-2xl text-green-600">$<%= product.price %></p><br>
+              <p class="text-1xl text-red-600"><%= product.brand %></p>
+              <p class="text-gray-800 mt-4"><%= product.description %></p>
+              <a href="/buy/<%= product.id %>">
+              <button class="bg-blue-500 text-white px-4 py-2 mt-4 hover:bg-blue-600" style="margin: 10px; ">Buy Now</button>
+            </a>
+            <a href="/addToCart/<%= product.id %>">
+              <button class="bg-blue-500 text-white px-4 py-2 mt-4 hover:bg-blue-600">Add to Cart</button>
+              </a>
+          </div>
       </div>
-      <button class="btn btn-primary" type="submit" name="button">Comment</button>
-</form>
+  </div>
 
 
-<%- include('partials/footer') %>
+
+    <!-- Comments Section -->
+    
+    <div class="bg-white p-4 w-100 h-21 overflow-auto shadow-md rounded-lg">
+      <h1 class="text-xl font-semibold mb-4">Comments</h1>
+      <div class="h-40 overflow-y-auto ex1" style="background-color: rgb(247, 248, 248); width: 100%; height: 300px; overflow: scroll;">
+          <!-- Your comments go here -->
+          <% product.comment.forEach(comment => { %>
+          <div class="mb-2">
+              <strong><%= comment.commentername %>:</strong> <%= comment.comm %>
+          </div>
+          <% }) %>
+          <!-- Add more comments as needed -->
+      </div>
+
+    <form action="/comment/<%= product.id %>" method="POST">
+      <textarea name="comment" class="w-full h-20 border border-gray-300 rounded-lg resize-none mt-4" placeholder="Add a comment..."></textarea>
+      <button class="w-full mt-2 bg-blue-500 text-white rounded-lg py-2" style="size: 100px; ">Post Comment</button>
+      </form>
+  </div>
+
+  <%- include('partials/footer') %>
